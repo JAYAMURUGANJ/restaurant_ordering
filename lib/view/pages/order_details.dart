@@ -221,27 +221,12 @@ class OrderMenuItem extends StatelessWidget {
       ),
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 4.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              '( ${item.quantity} ',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: Colors.grey[600]),
-            ),
-            4.pw,
-            const Text('x'),
-            4.pw,
-            Text(
-              '\$ ${item.price} )',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: Colors.grey[600]),
-            ),
-          ],
+        child: Text(
+          '( ${item.quantity} X \$ ${item.price} )',
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(color: Colors.grey[600], fontWeight: FontWeight.bold),
         ),
       ),
     );

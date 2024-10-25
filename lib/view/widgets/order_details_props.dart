@@ -40,7 +40,11 @@ class _OrderDetailsCardState extends State<OrderDetailsCard> {
                 padding: const EdgeInsets.all(4.0),
                 child: Center(
                   child: Text(
-                    orderType[orderDetails.orderTypeId - 1].name!.toUpperCase(),
+                    orderType
+                        .where((item) => item.id == orderDetails.orderTypeId)
+                        .first
+                        .name
+                        .toString(),
                     maxLines: 2,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
@@ -67,14 +71,14 @@ class _OrderDetailsCardState extends State<OrderDetailsCard> {
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   Text(
-                    orderDetails.customerName!.isNotEmpty
-                        ? "${orderDetails.customerName}"
-                        : "CUSTOMER",
+                    orderDetails.customerName == null
+                        ? "CUSTOMER"
+                        : "${orderDetails.customerName}",
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   Text(
-                    orderDetails.phoneNo == null
+                    orderDetails.phoneNo == null || orderDetails.phoneNo == ""
                         ? "PHONE NUMBER"
                         : "${orderDetails.phoneNo}",
                     style: Theme.of(context).textTheme.bodyLarge,

@@ -8,20 +8,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'app.dart';
+import 'controllers/hive/order_controller.dart';
 import 'model/food_menu.dart';
 import 'model/order.dart';
 import 'model/order_type.dart';
-import 'controllers/hive/order_controller.dart';
 
 Future<void> main() async {
   // Ensure WidgetsBinding is initialized before anything else
   WidgetsFlutterBinding.ensureInitialized();
-  // Register dependencies (after Hive initialization)
-  AppBindings().dependencies();
+
   // Initialize Hive and register adapters
   await _initHive();
+
+  // Register dependencies after Hive initialization
+  AppBindings().dependencies();
 
   // Run the app
   runApp(
@@ -34,9 +37,11 @@ Future<void> main() async {
 
 Future<void> _initHive() async {
   try {
-    await Hive.initFlutter();
+    final appDocumentDir = await getApplicationDocumentsDirectory();
+    Hive.init(
+        appDocumentDir.path); // Initialize Hive with the document directory
 
-    // Registering all adapters
+    // Register all adapters
     Hive.registerAdapter(FoodMenuAdapter());
     Hive.registerAdapter(FoodCategoryAdapter());
     Hive.registerAdapter(OrderAdapter());
@@ -46,7 +51,9 @@ Future<void> _initHive() async {
     Hive.registerAdapter(PaymentTypeAdapter());
 
     // Open required boxes
-    OrderServiceController orderServiceController = Get.find();
+    // Initialize the OrderServiceController only after Hive initialization
+    OrderServiceController orderServiceController =
+        Get.put(OrderServiceController());
     await orderServiceController.openBox();
   } catch (e) {
     // Handle any errors related to Hive initialization

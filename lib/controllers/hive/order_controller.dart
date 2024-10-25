@@ -206,21 +206,6 @@ class OrderServiceController extends GetxController {
     }
   }
 
-  // Method to update order status based on prepared statuses of menu items
-  Future<void> _updateOrderStatusBasedOnMenu(
-      List<OrderMenus> menuList, String orderTrackId) async {
-    bool allPrepared = menuList.every((menu) => menu.isPrepared == 1);
-    bool allProcessed = menuList.every((menu) => menu.isPrepared == 3);
-
-    if (allPrepared) {
-      await _updateOrderStatus(orderTrackId, 1); // All items prepared
-    } else if (allProcessed) {
-      await _updateOrderStatus(orderTrackId, 3); // All items processed
-    } else {
-      await _updateOrderStatus(orderTrackId, 2); // Cooking in progress
-    }
-  }
-
   // Method to save updated menu back to Hive
   Future<void> _saveUpdatedMenu(
       OrderMenus updatedMenu, OrderMenus oldMenu) async {
@@ -245,6 +230,21 @@ class OrderServiceController extends GetxController {
     await _orderMenuBox!.delete(menu.id);
     orderMenus.removeWhere((m) => m.id == menu.id);
     debugPrint('Menu item with id ${menu.id} deleted.');
+  }
+
+  // Method to update order status based on prepared statuses of menu items
+  Future<void> _updateOrderStatusBasedOnMenu(
+      List<OrderMenus> menuList, String orderTrackId) async {
+    bool allPrepared = menuList.every((menu) => menu.isPrepared == 1);
+    bool allProcessed = menuList.every((menu) => menu.isPrepared == 3);
+
+    if (allPrepared) {
+      await _updateOrderStatus(orderTrackId, 1); // All items prepared
+    } else if (allProcessed) {
+      await _updateOrderStatus(orderTrackId, 3); // All items processed
+    } else {
+      await _updateOrderStatus(orderTrackId, 2); // Cooking in progress
+    }
   }
 
   // Method to update order status in Hive
@@ -285,7 +285,28 @@ class OrderServiceController extends GetxController {
 
   // Method to delete an order
   Future<void> _deleteOrder(String orderTrackId) async {
-    // Implement the logic to delete the order from Hive
-    debugPrint('Order with orderTrackId: $orderTrackId deleted');
+    try {
+      // Find the key of the order that matches the orderTrackId
+      final orderKey = _orderBox?.keys.firstWhere(
+        (key) => _orderBox?.get(key)?.orderTrackId == orderTrackId,
+        orElse: () => null,
+      );
+
+      // Check if the order exists
+      if (orderKey != null) {
+        await _orderBox?.delete(orderKey); // Delete the order using its key
+        orders.assignAll(
+            _orderBox!.values.toList()); // Refresh the observable list
+        debugPrint('Order with orderTrackId: $orderTrackId deleted');
+      } else {
+        debugPrint('Order with orderTrackId: $orderTrackId not found');
+      }
+    } catch (e) {
+      debugPrint('Error deleting order with orderTrackId $orderTrackId: $e');
+    }
   }
+
+
+
+
 }
